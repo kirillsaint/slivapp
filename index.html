@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>SlivApp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  </head>
+  <body>
+    <style>
+      .header {
+        background-color: #282828;
+      }
+      body {
+        background-color: #303030;
+        color: white;
+      }
+      .form-control {
+        background-color: #282828;
+        color: white;
+        border-color: black;
+      }
+      .form-control:focus {
+        background-color: #282828;
+        color: white;
+        border-color: black;
+      }
+    </style>
+    <header class="p-3 header text-white">
+    <div class="container">
+      <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <a class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+          SlivApp
+        </a>
+
+        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+          <li><a href="#" onclick="document.getElementById('upcPage').style.display = 'none';document.getElementById('isrcPage').style.display = 'none';document.getElementById('main').style.display = '';" class="nav-link px-2 text-white">Главная</a></li>
+          <li><a href="#" onclick="document.getElementById('upcPage').style.display = '';document.getElementById('isrcPage').style.display = 'none';document.getElementById('main').style.display = 'none';" class="nav-link px-2 text-white">Поиск по UPC</a></li>
+          <li><a href="#" onclick="document.getElementById('upcPage').style.display = 'none';document.getElementById('isrcPage').style.display = '';document.getElementById('main').style.display = 'none';" class="nav-link px-2 text-white">Поиск по ISRC</a></li>
+        </ul>
+
+      </div>
+    </div>
+  </header>
+  <div class="container flex-shrink-0" id="main">
+      <h1 class="mt-5">Добро пожаловать в SlivApp!</h1>
+      <small class="lead">Разработчик: <b>@kirillsaint</b></small>
+  </div>
+    <div class="px-4 py-5 my-5 text-center" id='upcPage' style='display: none;'>
+      <div class="col-lg-6 mx-auto ">
+        <h1>Поиск по UPC</h1>
+        <form class="p-5 rounded-3 form" id="newRelease" enctype="multipart/form-data">
+          <div class="form-floating mb-3">
+            <input type="text" name="upc" class="form-control" id="upc" placeholder="UPC" required>
+
+            <label for="upc">* UPC</label>
+          </div>
+          <a type="button" class="w-100 btn btn-lg btn-outline-primary" onclick="searchUpc()">Поиск</a>
+        </form>
+        <p id='loadingUpc'></p>
+      </div>
+    </div>
+    <div class="px-4 py-5 my-5 text-center" id='isrcPage' style='display: none;'>
+      <div class="col-lg-6 mx-auto ">
+        <h1>Поиск по ISRC</h1>
+        <form class="p-5 rounded-3 form" enctype="multipart/form-data">
+          <div class="form-floating mb-3">
+            <input type="text" name="isrc" class="form-control" id="isrc" placeholder="ISRC" required>
+
+            <label for="upc">* ISRC</label>
+          </div>
+          <a type="button" class="w-100 btn btn-lg btn-outline-primary" onclick="searchIsrc()">Поиск</a>
+        </form>
+        <p id='loadingIsrc'></p>
+      </div>
+    </div>
+    <script type="text/javascript">
+    require('./render.js')
+    </script>
+    <script type="text/javascript">
+      function millisToMinutesAndSeconds(millis) {
+        var minutes = Math.floor(millis / 60000);
+        var seconds = ((millis % 60000) / 1000).toFixed(0);
+        return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+      }
+      async function searchUpc() {
+        let upc = document.getElementById("upc").value
+        document.getElementById('loadingUpc').innerText = `Поиск по ${upc} начался...`
+        try {
+          const response = await axios.get(`https://eu-api-v2.acrcloud.com/api/music/search?per_page=1&page=1&q=upc:${upc}`, {
+            headers: {
+          	  'Accept': 'application/json',
+          	  'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI3IiwianRpIjoiOWJjZWY3NTA4ZjAyZjQxMzFkYmViYzVjZmZkMjY2ZGMxN2RhZmM3ODNlOGY3MjY0NzcwMTNlNWU5NThhZDg0MzVhZWJlMjQxYzdjZTA0NGYiLCJpYXQiOjE2MjcxNDg1MTguODY2MzMsIm5iZiI6MTYyNzE0ODUxOC44NjYzMzMsImV4cCI6MTk0MjY4MTMxOC43Mzc1ODEsInN1YiI6IjEyMTMzNSIsInNjb3BlcyI6WyIqIiwid3JpdGUtYWxsIiwicmVhZC1hbGwiLCJidWNrZXRzIiwid3JpdGUtYnVja2V0cyIsInJlYWQtYnVja2V0cyIsImF1ZGlvcyIsIndyaXRlLWF1ZGlvcyIsInJlYWQtYXVkaW9zIiwiY2hhbm5lbHMiLCJ3cml0ZS1jaGFubmVscyIsInJlYWQtY2hhbm5lbHMiLCJiYXNlLXByb2plY3RzIiwid3JpdGUtYmFzZS1wcm9qZWN0cyIsInJlYWQtYmFzZS1wcm9qZWN0cyIsInVjZiIsIndyaXRlLXVjZiIsInJlYWQtdWNmIiwiZGVsZXRlLXVjZiIsImJtLXByb2plY3RzIiwiYm0tY3MtcHJvamVjdHMiLCJ3cml0ZS1ibS1jcy1wcm9qZWN0cyIsInJlYWQtYm0tY3MtcHJvamVjdHMiLCJibS1iZC1wcm9qZWN0cyIsIndyaXRlLWJtLWJkLXByb2plY3RzIiwicmVhZC1ibS1iZC1wcm9qZWN0cyJdfQ.Cr9lUgg6aArDHcf_S-0uvlS4bg_Lr6niL3LxvS01uC0G9biXpzwDGVVc1hKmfEfTyvVY2kWFCMWjJgHODS5MyvHFpaq3jW1oFwLW55bEJI8ZqE8Pg9anpoTvYLO-xx3jaYnb6QhxdwIYh8N9cBd65D1p-dR9Y954Kjc8FRNUH2opAWk3mdm1-uhcfWi24XKtVC8Ez0MG_0B9ShtPXheV7aIftYLTDKzru39ZNeRn_ei21R3bejNsCF2EOFN3h1amFCXCVvpGgShSe39r1tja5b32pQq-lC4htWve4lBUM1yrof5giCKXmIjX9URj4l5aobitbpyNIJgW3wVvNcM_mZ-mi2y-D0i3szKUrIpfKKSdfl-AOACfqAvjsyWmULh0aABCWpiYxrCoKx9l6OXF16i4oKcaCvgJFYR6Y0WVj-Is0p6dWERBGgGPCClTe19NukUTO05-mkXz1Kwp2PI56IkGXr0WmNJBZZ6VWXeNvbVlRSKJ7UqUVisP293Mkvd2AEHFQ_HyC6X4Nr4xpaWhSvwvEqszb5gxkzo8bIi2gZukKa9wGJD6RGbcA_KD47RhIHx-BN-gPwq0YE-FJeu3QJNf7zKqIW_Y4gDcQBdMPu51Qyrh8p4w9aVUPZycS4Va1lgMuD-J-uaJwodhIfelPR4ji0KGAqF2WV2Imw7Ukvw'
+          	}
+          })
+          const data = await response['data']
+          console.log(data)
+          if(data.meta.total == 0){
+            document.getElementById('loadingUpc').innerText = `Ничего не найдено!`
+          } else {
+            const release = data["data"][0]
+            document.getElementById('loadingUpc').innerHTML = `<b>${release.artists[0].name} - ${release.title}</b><br><br><b>Альбом:</b> ${release.album.name}<br><br><b>ISRC:</b> ${release.external_ids.isrc[0]}<br><b>UPC:</b> ${release.external_ids.upc[0]}<br><br><b>Длительность:</b> ${millisToMinutesAndSeconds(release.duration_ms)}<br><b>Лейбл:</b> ${release.label}`
+          }
+        } catch(e) {
+          document.getElementById('loadingUpc').innerText = `Ошибка: ${e}`
+        }
+      }
+      async function searchIsrc() {
+        let isrc = document.getElementById("isrc").value
+        document.getElementById('loadingIsrc').innerText = `Поиск по ${isrc} начался...`
+        try {
+          const response = await axios.get(`https://eu-api-v2.acrcloud.com/api/music/search?per_page=1&page=1&q=isrc:${isrc}`, {
+            headers: {
+          	  'Accept': 'application/json',
+          	  'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI3IiwianRpIjoiOWJjZWY3NTA4ZjAyZjQxMzFkYmViYzVjZmZkMjY2ZGMxN2RhZmM3ODNlOGY3MjY0NzcwMTNlNWU5NThhZDg0MzVhZWJlMjQxYzdjZTA0NGYiLCJpYXQiOjE2MjcxNDg1MTguODY2MzMsIm5iZiI6MTYyNzE0ODUxOC44NjYzMzMsImV4cCI6MTk0MjY4MTMxOC43Mzc1ODEsInN1YiI6IjEyMTMzNSIsInNjb3BlcyI6WyIqIiwid3JpdGUtYWxsIiwicmVhZC1hbGwiLCJidWNrZXRzIiwid3JpdGUtYnVja2V0cyIsInJlYWQtYnVja2V0cyIsImF1ZGlvcyIsIndyaXRlLWF1ZGlvcyIsInJlYWQtYXVkaW9zIiwiY2hhbm5lbHMiLCJ3cml0ZS1jaGFubmVscyIsInJlYWQtY2hhbm5lbHMiLCJiYXNlLXByb2plY3RzIiwid3JpdGUtYmFzZS1wcm9qZWN0cyIsInJlYWQtYmFzZS1wcm9qZWN0cyIsInVjZiIsIndyaXRlLXVjZiIsInJlYWQtdWNmIiwiZGVsZXRlLXVjZiIsImJtLXByb2plY3RzIiwiYm0tY3MtcHJvamVjdHMiLCJ3cml0ZS1ibS1jcy1wcm9qZWN0cyIsInJlYWQtYm0tY3MtcHJvamVjdHMiLCJibS1iZC1wcm9qZWN0cyIsIndyaXRlLWJtLWJkLXByb2plY3RzIiwicmVhZC1ibS1iZC1wcm9qZWN0cyJdfQ.Cr9lUgg6aArDHcf_S-0uvlS4bg_Lr6niL3LxvS01uC0G9biXpzwDGVVc1hKmfEfTyvVY2kWFCMWjJgHODS5MyvHFpaq3jW1oFwLW55bEJI8ZqE8Pg9anpoTvYLO-xx3jaYnb6QhxdwIYh8N9cBd65D1p-dR9Y954Kjc8FRNUH2opAWk3mdm1-uhcfWi24XKtVC8Ez0MG_0B9ShtPXheV7aIftYLTDKzru39ZNeRn_ei21R3bejNsCF2EOFN3h1amFCXCVvpGgShSe39r1tja5b32pQq-lC4htWve4lBUM1yrof5giCKXmIjX9URj4l5aobitbpyNIJgW3wVvNcM_mZ-mi2y-D0i3szKUrIpfKKSdfl-AOACfqAvjsyWmULh0aABCWpiYxrCoKx9l6OXF16i4oKcaCvgJFYR6Y0WVj-Is0p6dWERBGgGPCClTe19NukUTO05-mkXz1Kwp2PI56IkGXr0WmNJBZZ6VWXeNvbVlRSKJ7UqUVisP293Mkvd2AEHFQ_HyC6X4Nr4xpaWhSvwvEqszb5gxkzo8bIi2gZukKa9wGJD6RGbcA_KD47RhIHx-BN-gPwq0YE-FJeu3QJNf7zKqIW_Y4gDcQBdMPu51Qyrh8p4w9aVUPZycS4Va1lgMuD-J-uaJwodhIfelPR4ji0KGAqF2WV2Imw7Ukvw'
+          	}
+          })
+          const data = await response['data']
+          console.log(data)
+          if(data.meta.total == 0){
+            document.getElementById('loadingIsrc').innerText = `Ничего не найдено!`
+          } else {
+            const release = data["data"][0]
+            document.getElementById('loadingIsrc').innerHTML = `<b>${release.artists[0].name} - ${release.title}</b><br><br><b>Альбом:</b> ${release.album.name}<br><br><b>ISRC:</b> ${release.external_ids.isrc[0]}<br><b>UPC:</b> ${release.external_ids.upc[0]}<br><br><b>Длительность:</b> ${millisToMinutesAndSeconds(release.duration_ms)}<br><b>Лейбл:</b> ${release.label}`
+          }
+        } catch(e) {
+          document.getElementById('loadingIsrc').innerText = `Ошибка: ${e}`
+        }
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </body>
+</html>
