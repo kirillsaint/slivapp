@@ -2,3 +2,5 @@ out
 node_modules
 builds
 .DS_Store
+builds/.DS_Store
+builds/1.0.0/SlivApp_macIntel.zip
