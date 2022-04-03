@@ -8,7 +8,8 @@ function createWindow() {
   win = new BrowserWindow({
     width: 900,
     height: 550,
-    icon: __dirname + '/images/icon.png'
+    icon: __dirname + '/images/icon.png',
+    autoHideMenuBar: true
   })
 
   win.loadURL(url.format({
