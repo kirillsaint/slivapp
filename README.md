@@ -4,4 +4,4 @@
 
 **Скачать**
 
-[https://github.com/kirillsaint/slivapp/releases/tag/2.0.0](https://github.com/kirillsaint/slivapp/releases/tag/2.0.0)
+[https://github.com/kirillsaint/slivapp/releases/tag/latest](https://github.com/kirillsaint/slivapp/releases/tag/latest)
