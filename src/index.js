@@ -7,8 +7,9 @@ let win;
 function createWindow() {
   win = new BrowserWindow({
     width: 900,
-    height: 550,
-    icon: __dirname + '/images/icon.png'
+    height: 700,
+    icon: __dirname + '/images/icon.png',
+    autoHideMenuBar: true
   })
 
   win.loadURL(url.format({
