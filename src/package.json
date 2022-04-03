@@ -6,9 +6,10 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "winbuild": "npm run package && node winbuild.js"
   },
-  "author": "kirillsaint",
+  "author": "kirillsaint & clownless",
   "license": "ISC",
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.63",
@@ -23,7 +24,8 @@
     "icon": "images/icon.png"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-winstaller": "^5.0.0"
   },
   "config": {
     "forge": {
