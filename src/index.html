@@ -26,6 +26,21 @@
         border-color: black;
       }
     </style>
+    <script>
+      async function checkVersion() {
+        const version = '1.0.1'
+
+        const response = await fetch('https://api.github.com/repos/kirillsaint/slivapp/releases')
+        const data = await response.json()
+
+        if(data[0]['name'] != version) {
+          document.getElementById('update_warning').style.display = ""
+          document.getElementById('update_warning_link').innerText = data[0]['html_url']
+          document.getElementById('update_warning_link').href = data[0]['html_url']
+        }
+      }
+      checkVersion()
+    </script>
     <header class="p-3 header text-white">
     <div class="container">
       <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
@@ -34,14 +49,19 @@
         </a>
 
         <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
-          <li><a href="#" onclick="document.getElementById('upcPage').style.display = 'none';document.getElementById('isrcPage').style.display = 'none';document.getElementById('main').style.display = '';" class="nav-link px-2 text-white">Главная</a></li>
-          <li><a href="#" onclick="document.getElementById('upcPage').style.display = '';document.getElementById('isrcPage').style.display = 'none';document.getElementById('main').style.display = 'none';" class="nav-link px-2 text-white">Поиск по UPC</a></li>
-          <li><a href="#" onclick="document.getElementById('upcPage').style.display = 'none';document.getElementById('isrcPage').style.display = '';document.getElementById('main').style.display = 'none';" class="nav-link px-2 text-white">Поиск по ISRC</a></li>
+          <li><a href="#" onclick="document.getElementById('namePage').style.display = 'none';document.getElementById('upcPage').style.display = 'none';document.getElementById('isrcPage').style.display = 'none';document.getElementById('main').style.display = '';" class="nav-link px-2 text-white">Главная</a></li>
+          <li><a href="#" onclick="document.getElementById('namePage').style.display = 'none';document.getElementById('upcPage').style.display = '';document.getElementById('isrcPage').style.display = 'none';document.getElementById('main').style.display = 'none';" class="nav-link px-2 text-white">Поиск по UPC</a></li>
+          <li><a href="#" onclick="document.getElementById('namePage').style.display = 'none';document.getElementById('upcPage').style.display = 'none';document.getElementById('isrcPage').style.display = '';document.getElementById('main').style.display = 'none';" class="nav-link px-2 text-white">Поиск по ISRC</a></li>
+          <li><a href="#" onclick="document.getElementById('namePage').style.display = '';document.getElementById('upcPage').style.display = 'none';document.getElementById('isrcPage').style.display = 'none';document.getElementById('main').style.display = 'none';" class="nav-link px-2 text-white">Поиск по названию</a></li>
         </ul>
 
       </div>
     </div>
   </header>
+  <div class="alert alert-warning alert-dismissible fade show" id="update_warning" role="alert" style="display: none;">
+    <strong>Вы используете старую версию SlivApp!</strong> Обновите приложение на этой странице: <a target="_blank" href="#" id="update_warning_link"></a>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
   <div class="container flex-shrink-0" id="main">
       <h1 class="mt-5">Добро пожаловать в SlivApp!</h1>
       <small class="lead">Разработчик: <b>@kirillsaint</b></small>
@@ -74,6 +94,25 @@
         <p id='loadingIsrc'></p>
       </div>
     </div>
+    <div class="px-4 py-5 my-5 text-center" id='namePage' style='display: none;'>
+      <div class="col-lg-6 mx-auto ">
+        <h1>Поиск по названию</h1>
+        <form class="p-5 rounded-3 form" enctype="multipart/form-data">
+          <div class="form-floating mb-3">
+            <input type="text" name="artist" class="form-control" id="artist" placeholder="Артист" required>
+
+            <label for="artist">* Артист</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="text" name="name" class="form-control" id="name" placeholder="Название" required>
+
+            <label for="name">* Название</label>
+          </div>
+          <a type="button" class="w-100 btn btn-lg btn-outline-primary" onclick="searchName()">Поиск</a>
+        </form>
+        <p id='loadingName'></p>
+      </div>
+    </div>
     <script type="text/javascript">
     require('./render.js')
     </script>
@@ -94,7 +133,6 @@
           	}
           })
           const data = await response['data']
-          console.log(data)
           if(data.meta.total == 0){
             document.getElementById('loadingUpc').innerText = `Ничего не найдено!`
           } else {
@@ -116,7 +154,6 @@
           	}
           })
           const data = await response['data']
-          console.log(data)
           if(data.meta.total == 0){
             document.getElementById('loadingIsrc').innerText = `Ничего не найдено!`
           } else {
@@ -125,6 +162,29 @@
           }
         } catch(e) {
           document.getElementById('loadingIsrc').innerText = `Ошибка: ${e}`
+        }
+      }
+      async function searchName() {
+        let artist = document.getElementById("artist").value
+        let name = document.getElementById("name").value
+        document.getElementById('loadingName').innerText = `Поиск по ${artist} - ${name} начался...`
+        try {
+          const response = await axios.get(`https://eu-api-v2.acrcloud.com/api/music/search?per_page=20&page=1&q=title:"${name}"%3Bartist:"${artist}"`, {
+            headers: {
+          	  'Accept': 'application/json',
+          	  'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI3IiwianRpIjoiOWJjZWY3NTA4ZjAyZjQxMzFkYmViYzVjZmZkMjY2ZGMxN2RhZmM3ODNlOGY3MjY0NzcwMTNlNWU5NThhZDg0MzVhZWJlMjQxYzdjZTA0NGYiLCJpYXQiOjE2MjcxNDg1MTguODY2MzMsIm5iZiI6MTYyNzE0ODUxOC44NjYzMzMsImV4cCI6MTk0MjY4MTMxOC43Mzc1ODEsInN1YiI6IjEyMTMzNSIsInNjb3BlcyI6WyIqIiwid3JpdGUtYWxsIiwicmVhZC1hbGwiLCJidWNrZXRzIiwid3JpdGUtYnVja2V0cyIsInJlYWQtYnVja2V0cyIsImF1ZGlvcyIsIndyaXRlLWF1ZGlvcyIsInJlYWQtYXVkaW9zIiwiY2hhbm5lbHMiLCJ3cml0ZS1jaGFubmVscyIsInJlYWQtY2hhbm5lbHMiLCJiYXNlLXByb2plY3RzIiwid3JpdGUtYmFzZS1wcm9qZWN0cyIsInJlYWQtYmFzZS1wcm9qZWN0cyIsInVjZiIsIndyaXRlLXVjZiIsInJlYWQtdWNmIiwiZGVsZXRlLXVjZiIsImJtLXByb2plY3RzIiwiYm0tY3MtcHJvamVjdHMiLCJ3cml0ZS1ibS1jcy1wcm9qZWN0cyIsInJlYWQtYm0tY3MtcHJvamVjdHMiLCJibS1iZC1wcm9qZWN0cyIsIndyaXRlLWJtLWJkLXByb2plY3RzIiwicmVhZC1ibS1iZC1wcm9qZWN0cyJdfQ.Cr9lUgg6aArDHcf_S-0uvlS4bg_Lr6niL3LxvS01uC0G9biXpzwDGVVc1hKmfEfTyvVY2kWFCMWjJgHODS5MyvHFpaq3jW1oFwLW55bEJI8ZqE8Pg9anpoTvYLO-xx3jaYnb6QhxdwIYh8N9cBd65D1p-dR9Y954Kjc8FRNUH2opAWk3mdm1-uhcfWi24XKtVC8Ez0MG_0B9ShtPXheV7aIftYLTDKzru39ZNeRn_ei21R3bejNsCF2EOFN3h1amFCXCVvpGgShSe39r1tja5b32pQq-lC4htWve4lBUM1yrof5giCKXmIjX9URj4l5aobitbpyNIJgW3wVvNcM_mZ-mi2y-D0i3szKUrIpfKKSdfl-AOACfqAvjsyWmULh0aABCWpiYxrCoKx9l6OXF16i4oKcaCvgJFYR6Y0WVj-Is0p6dWERBGgGPCClTe19NukUTO05-mkXz1Kwp2PI56IkGXr0WmNJBZZ6VWXeNvbVlRSKJ7UqUVisP293Mkvd2AEHFQ_HyC6X4Nr4xpaWhSvwvEqszb5gxkzo8bIi2gZukKa9wGJD6RGbcA_KD47RhIHx-BN-gPwq0YE-FJeu3QJNf7zKqIW_Y4gDcQBdMPu51Qyrh8p4w9aVUPZycS4Va1lgMuD-J-uaJwodhIfelPR4ji0KGAqF2WV2Imw7Ukvw'
+          	}
+          })
+          const data = await response['data']
+          console.log(data)
+          if(data.meta.total == 0){
+            document.getElementById('loadingName').innerText = `Ничего не найдено!`
+          } else {
+            const release = data["data"][0]
+            document.getElementById('loadingName').innerHTML = `<b>${release.artists[0].name} - ${release.title}</b><br><br><b>Альбом:</b> ${release.album.name}<br><br><b>ISRC:</b> ${release.external_ids.isrc[0]}<br><b>UPC:</b> ${release.external_ids.upc[0]}<br><br><b>Длительность:</b> ${millisToMinutesAndSeconds(release.duration_ms)}<br><b>Лейбл:</b> ${release.label}`
+          }
+        } catch(e) {
+          document.getElementById('loadingName').innerText = `Ошибка: ${e}`
         }
       }
     </script>
